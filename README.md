@@ -31,3 +31,21 @@ O visual usa Bootstrap local com tema em `wwwroot/css/site.css`. O formulário t
 A inspeção visual automatizada não foi concluída porque o host de acesso ao navegador estava indisponível. Login, cadastro e CSS foram verificados por HTTP.
 
 Em ambientes com restrição ao Event Log do Windows, execute com `$env:Logging__EventLog__LogLevel__Default='None'` para manter os logs no console. As chaves de Data Protection podem ser temporárias nesse ambiente; reiniciar o servidor exige novo login.
+
+## Área administrativa
+
+Novos scores são persistidos e consultáveis em `/Administracao` por contas com papel `Administrador`. Aplique a migration antes de executar a nova versão. Para promover uma conta cadastrada, execute no terminal do servidor:
+
+```powershell
+$env:AdministradorEmail='email-da-conta-cadastrada'
+dotnet run --project src/ScoreRebanho.Web -- --administrador
+Remove-Item Env:AdministradorEmail
+```
+
+A conta deve sair e entrar novamente após receber o papel. Nunca configure senha padrão ou promoção automática por cadastro. Relatórios históricos preservam os resultados originais e não são recalculados ao consultar.
+
+## Meus rebanhos
+
+A home (`/` ou `/Rebanhos`) permite cadastrar, consultar, editar e excluir os rebanhos da conta autenticada. Nome e propriedade identificam cada cadastro. Salvar recalcula o score e mantém um snapshot administrativo; excluir remove o cadastro após confirmação, preservando esses snapshots. Simulações avulsas anteriores continuam no histórico administrativo e não são importadas automaticamente.
+
+Antes de iniciar esta versão, aplique também a migration `CadastroRebanhos` com o comando `--migrate` acima. Os testes de CRUD usam SQLite em memória e verificam isolamento entre contas, concorrência, paginação e manutenção do histórico.

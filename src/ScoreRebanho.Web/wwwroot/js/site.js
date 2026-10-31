@@ -1,4 +1,19 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
+﻿(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    let preference = 'sistema';
+    try { preference = localStorage.getItem('tema') || 'sistema'; } catch { }
+    function apply() {
+        document.documentElement.dataset.bsTheme = preference === 'sistema' ? (media.matches ? 'dark' : 'light') : preference;
+    }
+    apply();
+    media.addEventListener('change', apply);
+    document.addEventListener('DOMContentLoaded', () => {
+        const select = document.getElementById('tema');
+        select.value = preference;
+        select.addEventListener('change', () => {
+            preference = select.value;
+            try { localStorage.setItem('tema', preference); } catch { }
+            apply();
+        });
+    });
+})();

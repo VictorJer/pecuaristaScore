@@ -1,4 +1,4 @@
-﻿namespace ScoreRebanho.Domain;
+namespace ScoreRebanho.Domain;
 
 public static class Calculadora
 {
@@ -95,8 +95,8 @@ public static class Calculadora
         if (margem < .2m) alertas.Add(new("MARGEM", "Margem abaixo de 20%. Avalie o cenário de queda do preço."));
         if (margem is null) alertas.Add(new("MARGEM_INDISPONIVEL", "Margem indisponível: gasto total zero."));
         if (pesoTotalVendido <= 0) alertas.Add(new("EQUILIBRIO_INDISPONIVEL", "Equilíbrio indisponível: peso vendido zero."));
-        return alertas;
+        // Ordem de atenção da interface v6; não altera pesos ou classificação do score.
+        string[] ordem = ["PREJUIZO", "SUPERLOTACAO", "SANIDADE", "MARGEM_INDISPONIVEL", "EQUILIBRIO_INDISPONIVEL", "MARGEM", "ROTACAO", "SUBUTILIZACAO"];
+        return alertas.OrderBy(a => Array.IndexOf(ordem, a.Codigo)).ToList();
     }
 }
-
-

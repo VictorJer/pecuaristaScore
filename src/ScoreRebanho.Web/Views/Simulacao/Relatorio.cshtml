@@ -1,21 +1,33 @@
 ﻿@model ResultadoVm
 @{ ViewData["Title"]="Relatório"; }
 <p class="eyebrow">Seu planejamento em números</p><h1 class="mb-4">Visão do seu rebanho</h1>
-<div class="hero-panel mb-4"><div class="card-body"><p class="score-value">@Model.Score <small class="fs-4">/ 100</small></p><h2 class="mt-4 mb-3">@Model.Classificacao</h2><p>Estimativa baseada em lotação, sanidade, margem e manejo.</p></div></div>
+<div class="hero-panel mb-4 d-flex flex-wrap align-items-center gap-4">
+<div class="score-ring" style="--score: @Model.Score" role="img" aria-label="Score @Model.Score de 100: @Model.Classificacao"><span><strong class="display-4">@Model.Score</strong><br />de 100</span></div>
+<div><h2>@Model.Classificacao</h2><p>Estimativa baseada em lotação, sanidade, margem e manejo.</p><p class="mb-0">Quanto maior a pontuação, menor o risco estimado pelo modelo.</p></div>
+</div>
+<div class="row g-3 mb-4">
+@foreach (var indicador in Model.Indicadores.Where(i => new[] { "Ocupação", "Capital inicial", "Lucro estimado", "Margem" }.Contains(i.Nome)))
+{
+<div class="col-sm-6 col-xl-3"><div class="card card-body h-100"><h2 class="h6">@indicador.Nome</h2><p class="fs-4 fw-bold mb-0">@indicador.Valor.ToString("N2") <small>@indicador.Unidade</small></p></div></div>
+}
+</div>
 <div class="alert alert-warning border-0 rounded-3">Estimativas para planejamento. Não garantem lucro, segurança ou aprovação de crédito. Confirme os valores de referência na sua região.</div>
-<h2 class="mt-4 mb-3">Alertas e recomendações</h2>
+<h2 class="mt-4 mb-3">O que fazer agora</h2>
 @if(Model.Alertas.Length == 0) { <p>Nenhum alerta disparado pelas regras atuais. Isso não elimina os riscos da operação.</p> }
-@foreach(var alerta in Model.Alertas) { <p class="alert alert-warning border-0 rounded-3">@alerta.Mensagem</p> }
-<h2 class="mt-4 mb-3">Composição do score</h2><div class="row g-3">@foreach (var componente in Model.Componentes) { <div class="col-sm-6 col-xl-3"><div class="card card-body h-100 p-4"><h3 class="h6">@componente.Nome</h3><p class="fs-3 fw-bold my-3">@componente.Valor.ToString("N2") <span class="small fw-normal fs-6">@componente.Unidade</span></p><p class="small text-muted mb-0">@componente.Explicacao</p></div></div> }</div>
+<ol class="ps-4">@foreach(var alerta in Model.Alertas) { <li class="alert alert-warning rounded-3">@alerta.Mensagem</li> }</ol>
+<h2 class="mt-4 mb-3">Composição do score</h2><div class="row g-3">@foreach (var componente in Model.Componentes) { <div class="col-sm-6 col-xl-3"><div class="card card-body h-100 p-4"><h3 class="h6">@componente.Nome</h3><p class="fs-3 fw-bold my-3">@componente.Valor.ToString("N2") <span class="small fw-normal fs-6">@componente.Unidade</span></p><meter class="w-100 mb-3" min="0" max="@componente.Unidade.Split('/').Last().Trim()" value="@componente.Valor.ToString(System.Globalization.CultureInfo.InvariantCulture)" aria-label="@componente.Nome: @componente.Valor.ToString("N2") @componente.Unidade">@componente.Valor</meter><p class="small text-muted mb-0">@componente.Explicacao</p></div></div> }</div>
 <p>O total é arredondado para inteiro antes da classificação. Componentes exibidos com duas casas podem apresentar pequena diferença visual.</p>
-<h2 class="mt-4 mb-3">Produção e resultado financeiro</h2><partial name="_Itens" model="Model.Indicadores" />
-<h2 class="mt-4 mb-3">Custos econômicos do período</h2><partial name="_Itens" model="Model.Custos" />
-<h2 class="mt-4 mb-3">Composição do capital inicial</h2><partial name="_Itens" model="Model.Capital" />
+<h2 class="mt-4 mb-3">Produção e resultado financeiro</h2><partial name="~/Views/Simulacao/_Itens.cshtml" model="Model.Indicadores" />
+<h2 class="mt-4 mb-3">Custos econômicos do período</h2><partial name="~/Views/Simulacao/_Itens.cshtml" model="Model.Custos" />
+<h2 class="mt-4 mb-3">Composição do capital inicial</h2><partial name="~/Views/Simulacao/_Itens.cshtml" model="Model.Capital" />
 <p>Capital inclui investimentos integrais e produtos de manejo. Manutenção, arrendamento e suplementação ocorrem durante a operação e estão fora deste indicador. Capital e custo econômico são indicadores distintos; não devem ser somados.</p>
 <details class="card card-body mb-4"><summary>Premissas — versão @Model.VersaoPremissas</summary>
 <p>Arroba viva = 30 kg; UA = 450 kg. Mortalidade reduz somente vendas, sem reduzir despesas. Aplicações no dia zero e em cada intervalo de 90/150 dias, incluindo o último dia. Embalagens arredondadas para cima sobre consumo total. Capacidade em animais usa o peso de compra e arredonda para baixo. Score arredondado com empate para cima. Moeda e demais números: duas casas; GMD: três.</p>
 <p>Formação verão: semente 420 + calcário 375 + adubo 640 + ureia 350 + plantio 600 = R$ 2.385/ha. Inverno: 425 + 250 + 800 + 525 + 400 = R$ 2.400/ha (referências iniciais).</p>
 <dl class="row">@foreach(var p in Model.Premissas) { <dt class="col-sm-6">@p.Key</dt><dd class="col-sm-6">@p.Value</dd> }</dl></details>
+@if (ViewData["Rebanho"] is Guid rebanhoId) { <a asp-controller="Rebanhos" asp-action="Editar" asp-route-id="@rebanhoId" class="btn btn-success">Editar rebanho</a> }
+else if (ViewData["SomenteLeitura"] is true) { <a asp-controller="Administracao" asp-action="Index" class="btn btn-outline-success">Voltar ao histórico</a> }
+else {
 <form asp-action="Editar" method="post">
 <input type="hidden" name="Area" value="@Model.Entrada.Area" />
 <input type="hidden" name="Posse" value="@Model.Entrada.Posse" />
@@ -34,4 +46,9 @@
 <input type="hidden" name="Vermifugo" value="@Model.Entrada.Vermifugo" />
 <input type="hidden" name="Modificador" value="@Model.Entrada.Modificador" />
 <button class="btn btn-outline-success" type="submit">Editar dados</button> <a asp-action="Index" class="btn btn-success">Novo score</a></form>
+
+
+}
+
+
 

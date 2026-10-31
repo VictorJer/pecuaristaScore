@@ -265,3 +265,25 @@ Não ocultar divergências: refletir as decisões escolhidas em testes, no relat
 - Score limitado a 0–100 e arredondado com empate para cima antes da classificação. Exibição com duas casas, exceto GMD com três e score inteiro. Os componentes podem diferir visualmente do inteiro por arredondamento.
 - Parâmetros inválidos impedem inicialização; estouro numérico de entradas retorna falha esperada sem relatório parcial.
 - Cenário adverso altera somente preço/receita e seus resultados financeiros, preservando produção e custos.
+
+## 14. Ampliação aprovada: administração de scores
+
+O histórico de simulações passa a fazer parte do escopo. Cada cálculo válido é salvo com autor, data UTC, entradas, resultado e premissas utilizadas. Novos cálculos e recálculos geram registros distintos. Dados inválidos não são salvos. Resultados anteriores à implementação não podem ser recuperados.
+
+Somente contas com papel Identity `Administrador` podem listar os scores de todos os usuários e abrir relatórios históricos. Consulta paginada em 20 registros, mais recentes primeiro, sem edição ou exclusão. Cadastro público nunca concede esse papel. A atribuição inicial ocorre por comando local explícito a uma conta já cadastrada. Esta seção substitui as exclusões anteriores de histórico e de papéis para esta funcionalidade.
+
+## 15. Evolução da interface — protótipo v6 (P1)
+
+O formulário oferece terreno, lote, manejo e conferência da ocupação no servidor antes de gerar o score. O resumo não cria registro no histórico e não exibe pontuação nem resultado financeiro. O cálculo definitivo continua validando e recalculando todas as entradas. Sem JavaScript, o formulário completo permite atualizar resumo e gerar relatório.
+
+O relatório destaca score, componentes, indicadores principais e recomendações na ordem de atenção documentada em `docs/ideias-prototipo-v6.md`. Fórmulas, limites e premissas da versão 1.0 permanecem vigentes. Tema claro/escuro acompanha o sistema ou a preferência escolhida. Localização, propriedades, comparação/exclusão, clima, mercado e IA ainda dependem das decisões de produto desse documento.
+
+## 16. Home e CRUD de rebanhos
+
+A home autenticada lista somente os rebanhos do usuário, em páginas de 20, ordenados pela última atualização. Cada cadastro tem nome (obrigatório, até 100 caracteres), propriedade (identificação textual obrigatória, até 150), entradas da simulação e último resultado. Nomes repetidos são permitidos; propriedade não é um cadastro separado nesta entrega.
+
+Criar ou editar valida as entradas e recalcula no servidor com as premissas vigentes, salvando cadastro e novo score histórico atomicamente. Ler o relatório não recalcula. Atualizações concorrentes são recusadas para evitar sobrescrever dados de outra sessão. Os scores anteriores continuam imutáveis na administração.
+
+A exclusão requer confirmação e POST protegido contra CSRF. Remove definitivamente o cadastro da home, mantendo os scores administrativos anteriores. Acesso, edição e exclusão sempre filtram o autor autenticado, inclusive para administradores nesta interface. Identificadores de outros usuários retornam não encontrado.
+
+Simulações avulsas anteriores não são convertidas automaticamente em rebanhos, pois não têm nome/propriedade. O fluxo de nova simulação continua disponível. Comparação de versões, cadastro separado de propriedades e integrações externas permanecem fora desta entrega.

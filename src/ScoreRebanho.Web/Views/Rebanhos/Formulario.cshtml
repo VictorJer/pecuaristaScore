@@ -1,0 +1,22 @@
+﻿@model RebanhoFormularioVm
+@{ ViewData["Title"] = Model.Id.HasValue ? "Editar rebanho" : "Novo rebanho"; }
+<p class="eyebrow">Meus rebanhos</p>
+<h1>@ViewData["Title"]</h1>
+<p class="lead">Organize seu lote e confira o planejamento com os dados atualizados.</p>
+<form asp-action="Salvar" method="post" class="mt-4">
+<input asp-for="Id" type="hidden" /><input asp-for="Versao" type="hidden" />
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+<div class="card card-body p-4 mb-4">
+<div class="row g-3">
+<div class="col-md-6"><label asp-for="Nome" class="form-label"></label><input asp-for="Nome" class="form-control" maxlength="100" /><span asp-validation-for="Nome" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Propriedade" class="form-label"></label><input asp-for="Propriedade" class="form-control" maxlength="150" /><span asp-validation-for="Propriedade" class="text-danger"></span></div>
+</div></div>
+<partial name="~/Views/Simulacao/_Terreno.cshtml" for="Entrada" />
+<partial name="~/Views/Simulacao/_Lote.cshtml" for="Entrada" />
+<partial name="~/Views/Simulacao/_Manejo.cshtml" for="Entrada" />
+<p>Arrendamento obrigatório se arrendado. Piquetes obrigatórios com rotação; benefícios a partir de 3.</p>
+<p class="text-muted">Salvar recalcula o score com as premissas vigentes. Resultados são estimativas e não garantem lucro ou crédito.</p>
+<div class="d-flex flex-wrap gap-2"><button class="btn btn-success" type="submit">Salvar e gerar score</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+@if (Model.Id.HasValue) { <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-link">Recarregar dados salvos</a> }
+</div>
+</form>

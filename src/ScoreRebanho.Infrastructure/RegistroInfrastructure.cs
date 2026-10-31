@@ -15,6 +15,8 @@ public static class RegistroInfrastructure
         var p = config.GetSection("Premissas").Get<Premissas>() ?? new Premissas();
         p.Validar();
         services.AddSingleton<IProvedorPremissas>(new Provedor(p));
+        services.AddScoped<IHistoricoScores, HistoricoScores>();
+        services.AddScoped<IRebanhos, Rebanhos>();
         return services;
     }
     public static IdentityBuilder AdicionarStores(this IdentityBuilder builder) => builder.AddEntityFrameworkStores<ApplicationDbContext>();
@@ -25,3 +27,5 @@ public static class RegistroInfrastructure
     }
     private sealed class Provedor(Premissas p) : IProvedorPremissas { public Premissas Obter() => p with { }; }
 }
+
+

@@ -20,10 +20,10 @@
 <span asp-validation-for="Posse" class="text-danger">
 </span>
 </div>
-<div class="col-md-6" id="campo-arrendamento" hidden="@(Model.Posse != 1)">
+<div class="col-md-6" id="campo-arrendamento">
 <label asp-for="ArrendamentoMensal" class="form-label">
 </label>
-<input asp-for="ArrendamentoMensal" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Posse != 1)" required="@(Model.Posse == 1)" />
+<input asp-for="ArrendamentoMensal" type="text" inputmode="decimal" class="form-control" />
 <span asp-validation-for="ArrendamentoMensal" class="text-danger">
 </span>
 </div>

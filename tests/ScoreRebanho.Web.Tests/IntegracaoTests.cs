@@ -30,5 +30,17 @@ public class IntegracaoTests
         await db.SaveChangesAsync(); db.ChangeTracker.Clear();
         Assert.AreEqual(1, await db.Users.CountAsync());
         Assert.IsFalse((await db.Database.GetPendingMigrationsAsync()).Any());
+        var historico = new ScoreRebanho.Infrastructure.HistoricoScores(db);
+        var resultado = new ResultadoScoreDto(80,"Risco baixo",[],[],[],[],[],"1.0",new Dictionary<string,string>());
+        var salvo = new ScoreSalvoDto(Guid.NewGuid(),"usuario",DateTime.UtcNow,new(),resultado);
+        await historico.SalvarAsync(salvo);
+        db.ChangeTracker.Clear();
+        var recuperado = await historico.ObterAsync(salvo.Id);
+        Assert.IsNotNull(recuperado);
+        Assert.AreEqual(80,recuperado.Resultado.Score);
+        Assert.AreEqual("1.0",recuperado.Resultado.VersaoPremissas);
+        Assert.AreEqual(1,(await historico.ListarAsync(1)).Count);
+        Assert.AreEqual(0,(await historico.ListarAsync(2)).Count);
     }
 }
+

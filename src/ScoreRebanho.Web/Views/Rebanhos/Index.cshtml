@@ -1,0 +1,34 @@
+﻿@model PaginaRebanhosVm
+@{ ViewData["Title"] = "Meus rebanhos"; }
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+<div><p class="eyebrow">Seu planejamento</p><h1>Meus rebanhos</h1><p class="text-muted mb-0">Acompanhe seus lotes e mantenha os dados atualizados.</p></div>
+<a asp-action="Novo" class="btn btn-success">Cadastrar rebanho</a>
+</div>
+@if (TempData["Mensagem"] is string mensagem) { <div class="alert alert-success" role="status">@mensagem</div> }
+@if (Model.Itens.Count == 0)
+{
+<div class="card card-body p-5 text-center"><h2>@(Model.Pagina == 1 ? "Seu primeiro rebanho começa aqui" : "Nenhum rebanho nesta página")</h2><p>Cadastre nome, propriedade e dados do lote para acompanhar seu score.</p><div><a asp-action="Novo" class="btn btn-success">Cadastrar rebanho</a></div></div>
+}
+else
+{
+<div class="row g-4">
+@foreach (var rebanho in Model.Itens)
+{
+<div class="col-md-6 col-xl-4"><article class="card card-body p-4 h-100">
+<p class="eyebrow text-break">@rebanho.Propriedade</p><h2 class="text-break">@rebanho.Nome</h2>
+<div class="d-flex align-items-baseline gap-2 my-3"><strong class="display-5">@rebanho.Resultado.Score</strong><span>/ 100 · @rebanho.Resultado.Classificacao</span></div>
+<dl class="row"><dt class="col-6">Lote</dt><dd class="col-6">@rebanho.Entrada.Animais animais</dd><dt class="col-6">Área</dt><dd class="col-6">@rebanho.Entrada.Area.ToString("N2") ha</dd>
+@foreach (var indicador in rebanho.Resultado.Indicadores.Where(i => i.Nome is "Ocupação" or "Lucro estimado")) { <dt class="col-6">@indicador.Nome</dt><dd class="col-6">@indicador.Valor.ToString("N2") @indicador.Unidade</dd> }
+</dl>
+<p class="small text-muted">Atualizado em @rebanho.AtualizadoEmUtc.ToString("dd/MM/yyyy HH:mm") UTC</p>
+<div class="d-flex flex-wrap gap-2 mt-auto"><a asp-action="Detalhes" asp-route-id="@rebanho.Id" class="btn btn-success" aria-label="Ver @rebanho.Nome">Ver relatório</a><a asp-action="Editar" asp-route-id="@rebanho.Id" class="btn btn-outline-success" aria-label="Editar @rebanho.Nome">Editar</a><a asp-action="Excluir" asp-route-id="@rebanho.Id" class="btn btn-outline-danger" aria-label="Excluir @rebanho.Nome">Excluir</a></div>
+</article></div>
+}
+</div>
+<p class="small text-muted mt-3">Estimativas para planejamento. Os cadastros representam lotes informados, não um inventário atualizado automaticamente.</p>
+}
+<nav class="d-flex gap-3 mt-4 align-items-center" aria-label="Paginação dos rebanhos">
+@if (Model.Pagina > 1) { <a asp-action="Index" asp-route-pagina="@(Model.Pagina - 1)" class="btn btn-outline-secondary">Anterior</a> }
+<span>Página @Model.Pagina</span>
+@if (Model.TemProxima) { <a asp-action="Index" asp-route-pagina="@(Model.Pagina + 1)" class="btn btn-outline-secondary">Próxima</a> }
+</nav>

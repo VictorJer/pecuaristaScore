@@ -10,6 +10,17 @@ public interface IProvedorPremissas
 
 public sealed class CalcularScoreRebanho(IProvedorPremissas provedor)
 {
+    public Result<ResumoScoreDto> Resumir(EntradaScoreDto dados)
+    {
+        var resultado = Executar(dados);
+        if (resultado.IsFailed) return Result.Fail<ResumoScoreDto>(resultado.Errors);
+        var indicadores = resultado.Value.Indicadores;
+        return Result.Ok(new ResumoScoreDto(dados.Area, dados.Animais,
+            indicadores.Single(i => i.Nome == "UA do lote").Valor,
+            indicadores.Single(i => i.Nome == "Capacidade utilizada").Valor,
+            indicadores.Single(i => i.Nome == "Ocupação").Valor));
+    }
+
     public Result<ResultadoScoreDto> Executar(EntradaScoreDto dados)
     {
         var entrada = CriarEntrada(dados);

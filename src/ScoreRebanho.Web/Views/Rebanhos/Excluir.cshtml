@@ -1,0 +1,10 @@
+﻿@model RebanhoVm
+@{ ViewData["Title"] = "Excluir rebanho"; }
+<h1>Excluir rebanho</h1>
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+<div class="card card-body p-4 mt-4">
+<h2 class="text-break">@Model.Nome</h2><p class="text-break">@Model.Propriedade · @Model.Entrada.Animais animais · @Model.Entrada.Area.ToString("N2") ha</p>
+<p>Este cadastro será removido da sua lista. A ação não pode ser desfeita. Os scores já gerados permanecem no histórico administrativo.</p>
+<form asp-action="ConfirmarExclusao" method="post"><input type="hidden" name="Id" value="@Model.Id" /><input type="hidden" name="Versao" value="@Model.Versao" />
+<button class="btn btn-danger" type="submit">Confirmar exclusão</button> <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></form>
+</div>

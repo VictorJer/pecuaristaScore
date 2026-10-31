@@ -6,13 +6,15 @@ namespace ScoreRebanho.Web.Controllers;
 
 public class ContaController(UserManager<IdentityUser> users, SignInManager<IdentityUser> login) : Controller
 {
+    [HttpGet] public IActionResult AcessoNegado() { Response.StatusCode = 403; return View(); }
+
     [HttpGet] public IActionResult Entrar() => View(new ContaVm());
     [HttpPost]
     public async Task<IActionResult> Entrar(ContaVm vm)
     {
         if (!ModelState.IsValid) return View(vm);
         var r = await login.PasswordSignInAsync(vm.Email, vm.Senha, false, true);
-        if (r.Succeeded) return RedirectToAction("Index", "Simulacao");
+        if (r.Succeeded) return RedirectToAction("Index", "Rebanhos");
         ModelState.AddModelError("", r.IsLockedOut ? "Muitas tentativas. Tente novamente mais tarde." : "E-mail ou senha inválidos.");
         return View(vm);
     }
@@ -23,7 +25,7 @@ public class ContaController(UserManager<IdentityUser> users, SignInManager<Iden
         if (!ModelState.IsValid) return View(vm);
         var user = new IdentityUser { UserName = vm.Email, Email = vm.Email };
         var r = await users.CreateAsync(user, vm.Senha);
-        if (r.Succeeded) { await login.SignInAsync(user, false); return RedirectToAction("Index", "Simulacao"); }
+        if (r.Succeeded) { await login.SignInAsync(user, false); return RedirectToAction("Index", "Rebanhos"); }
         foreach (var e in r.Errors) ModelState.AddModelError("", Traduzir(e));
         return View(vm);
     }
@@ -48,3 +50,5 @@ public class ContaController(UserManager<IdentityUser> users, SignInManager<Iden
         _ => "A senha deve conter ao menos 6 caracteres, maiúscula, minúscula, número e símbolo."
     };
 }
+
+

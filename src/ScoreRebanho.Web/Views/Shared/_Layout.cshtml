@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
+    <script src="~/js/site.js" asp-append-version="true"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewData["Title"] — Score do Rebanho</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -11,14 +12,16 @@
     <a class="visually-hidden-focusable" href="#conteudo">Ir para o conteúdo</a>
     <header class="site-header mb-4 mb-lg-5">
         <nav class="container py-3 d-flex flex-wrap gap-3 align-items-center" aria-label="Navegação principal">
-            <a class="navbar-brand d-flex align-items-center gap-2 me-auto" asp-controller="Simulacao" asp-action="Index">
+            <a class="navbar-brand d-flex align-items-center gap-2 me-auto" asp-controller="Rebanhos" asp-action="Index">
                 <span class="brand-mark" aria-hidden="true">SR</span>
                 <span>Score <strong>do Rebanho</strong></span>
             </a>
             @if (User.Identity?.IsAuthenticated == true)
             {
+                <a class="nav-link" asp-controller="Rebanhos" asp-action="Index">Meus rebanhos</a>
                 <a class="nav-link" asp-controller="Simulacao" asp-action="Index">Nova simulação</a>
                 <a class="nav-link" asp-controller="Conta" asp-action="Senha">Minha conta</a>
+@if (User.IsInRole("Administrador")) { <a class="nav-link" asp-controller="Administracao" asp-action="Index">Administração</a> }
                 <form asp-controller="Conta" asp-action="Sair" method="post">
                     <button class="btn btn-outline-secondary btn-sm">Sair</button>
                 </form>
@@ -28,6 +31,8 @@
                 <a class="nav-link" asp-controller="Conta" asp-action="Entrar">Entrar</a>
                 <a class="btn btn-outline-success btn-sm" asp-controller="Conta" asp-action="Cadastrar">Criar conta</a>
             }
+            <label for="tema" class="small">Tema</label>
+            <select id="tema" class="form-select w-auto" aria-label="Preferência de tema"><option value="sistema">Sistema</option><option value="light">Claro</option><option value="dark">Escuro</option></select>
         </nav>
     </header>
     <main id="conteudo" class="container pb-5">@RenderBody()</main>
@@ -38,3 +43,5 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+

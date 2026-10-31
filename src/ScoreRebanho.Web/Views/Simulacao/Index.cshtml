@@ -1,4 +1,4 @@
-﻿@model SimulacaoVm
+@model SimulacaoVm
 @{ ViewData["Title"] = "Novo score"; }
 <div class="eyebrow mb-2">Planejamento da propriedade</div>
 <h1>O próximo lote começa com um bom plano.</h1>
@@ -6,14 +6,40 @@
 <p class="text-muted">Resultados estimados. Não garantem lucro ou aprovação de crédito.</p>
 <div class="row g-4 mt-3">
 <div class="col-lg-8">
-<form asp-action="Gerar" method="post">
+<form asp-action="Gerar" method="post" id="simulacao" data-resumo="@(ViewData["Resumo"] is ResumoVm ? "true" : "false")">
+<nav id="progresso" class="mb-4" aria-label="Etapas da simulação" hidden>
+<ol class="d-flex flex-wrap gap-3 list-unstyled"><li>1. Terreno</li><li>2. Lote</li><li>3. Manejo</li><li>4. Resumo</li></ol>
+<p id="etapa-atual" class="fw-semibold" aria-live="polite"></p>
+</nav>
 <div asp-validation-summary="All" class="text-danger" role="alert">
 </div>
-<partial name="_Terreno" model="Model" />
-<partial name="_Lote" model="Model" />
-<partial name="_Manejo" model="Model" />
+<section data-etapa="Terreno"><partial name="_Terreno" model="Model" /></section>
+<section data-etapa="Lote"><partial name="_Lote" model="Model" /></section>
+<section data-etapa="Manejo"><partial name="_Manejo" model="Model" /></section>
+<section data-etapa="Resumo">
+<h2 tabindex="-1">Confira antes de gerar</h2>
+@if (ViewData["Resumo"] is ResumoVm resumo)
+{
+    <div id="resumo-calculado" class="card card-body mb-3">
+    <dl class="row mb-0">
+    <dt class="col-6">Área</dt><dd class="col-6">@resumo.Area.ToString("N2") ha</dd>
+    <dt class="col-6">Lote</dt><dd class="col-6">@resumo.Animais animais</dd>
+    <dt class="col-6">UA do lote</dt><dd class="col-6">@resumo.UnidadesAnimais.ToString("N2") UA</dd>
+    <dt class="col-6">Capacidade</dt><dd class="col-6">@resumo.Capacidade.ToString("N2") UA</dd>
+    <dt class="col-6">Ocupação estimada</dt><dd class="col-6">@resumo.Ocupacao.ToString("N2") %</dd>
+    </dl>
+    <p class="small mb-0">Estimativa com o peso de compra e o manejo informado. O resumo não salva um score.</p>
+    </div>
+}
+<p id="resumo-aviso" role="status">Atualize o resumo após alterar os dados. O score será recalculado no servidor ao gerar.</p>
+<button id="atualizar-resumo" class="btn btn-outline-success mb-3" type="submit" asp-action="Resumo">Atualizar resumo</button>
+</section>
 <p>Arrendamento: obrigatório se arrendado. Piquetes: obrigatório com rotação; benefícios a partir de 3.</p>
-<button class="btn btn-success btn-lg w-100" type="submit">Gerar score</button>
+<div class="d-flex flex-wrap gap-2">
+<button id="voltar" class="btn btn-outline-secondary" type="button" hidden>Voltar</button>
+<button id="avancar" class="btn btn-success" type="button" hidden>Continuar</button>
+<button id="gerar" class="btn btn-success" type="submit">Gerar score</button>
+</div>
 </form>
 </div>
 <aside class="col-lg-4">
@@ -29,7 +55,7 @@
 <li class="mb-2">Projeção de receita e margem</li>
 <li>Score com fatores explicados</li>
 </ul>
-<p class="small mb-0">A simulação não é salva. Você poderá editar os dados na tela de resultado.</p>
+<p class="small mb-0">Os scores gerados são salvos e podem ser consultados pela administração. Você poderá editar os dados na tela de resultado.</p>
 </div>
 </aside>
 </div>

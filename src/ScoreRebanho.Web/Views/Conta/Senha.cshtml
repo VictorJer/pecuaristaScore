@@ -1,7 +1,18 @@
 ﻿@model SenhaVm
-<h1>Alterar senha</h1>
-@if(TempData["Mensagem"] is string mensagem) { <p class="alert alert-success">@mensagem</p> }
-<form method="post" asp-action="Senha" class="card card-body col-md-6"><div asp-validation-summary="All" class="text-danger"></div>
-<label asp-for="Atual"></label><input asp-for="Atual" class="form-control mb-3" autocomplete="current-password" />
-<label asp-for="Nova"></label><input asp-for="Nova" class="form-control mb-3" autocomplete="new-password" />
-<button class="btn btn-success">Alterar senha</button></form>
+@{ ViewData["Title"] = "Minha conta"; }
+<div class="row justify-content-center"><div class="col-lg-6">
+    <p class="eyebrow">Minha conta</p>
+    <h1 class="mb-4">Uma nova senha.</h1>
+    @if (TempData["Mensagem"] is string mensagem)
+    {
+        <p class="alert alert-success" role="status">@mensagem</p>
+    }
+    <form method="post" asp-action="Senha" class="card card-body p-4">
+        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+        <div class="mb-3"><label asp-for="Atual" class="form-label"></label><input asp-for="Atual" class="form-control" autocomplete="current-password" /></div>
+        <div class="mb-3"><label asp-for="Nova" class="form-label"></label><input asp-for="Nova" class="form-control" autocomplete="new-password" /></div>
+        <p class="small text-muted">Use ao menos 6 caracteres, com maiúscula, minúscula, número e símbolo.</p>
+        <button class="btn btn-success">Salvar nova senha</button>
+        <a class="link-success text-center mt-3" asp-controller="Simulacao" asp-action="Index">Voltar à simulação</a>
+    </form>
+</div></div>

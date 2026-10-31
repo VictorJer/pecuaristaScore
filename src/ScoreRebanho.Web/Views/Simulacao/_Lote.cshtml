@@ -1,0 +1,44 @@
+﻿@model SimulacaoVm
+<fieldset class="card card-body p-4 mb-4">
+<legend class="h4 mb-4">
+<span class="section-number">02</span>O lote que você planeja</legend>
+<div class="row g-3">
+<div class="col-md-6">
+<label asp-for="Animais" class="form-label">
+</label>
+<input asp-for="Animais" type="text" inputmode="decimal" class="form-control" />
+<span asp-validation-for="Animais" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="PesoCompra" class="form-label">
+</label>
+<input asp-for="PesoCompra" type="text" inputmode="decimal" class="form-control" />
+<span asp-validation-for="PesoCompra" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="PrecoCompra" class="form-label">
+</label>
+<input asp-for="PrecoCompra" type="text" inputmode="decimal" class="form-control" />
+<span asp-validation-for="PrecoCompra" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="Dias" class="form-label">
+</label>
+<input asp-for="Dias" type="text" inputmode="decimal" class="form-control" />
+<span asp-validation-for="Dias" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="RacaPura" class="form-label">
+</label>
+<div>
+<input asp-for="RacaPura" class="form-check-input" /> <span class="small text-muted">Sim, considerado nesta simulação</span>
+</div>
+<span asp-validation-for="RacaPura" class="text-danger">
+</span>
+</div>
+</div>
+</fieldset>

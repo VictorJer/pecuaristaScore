@@ -1,45 +1,85 @@
 ﻿using FluentResults;
 using ScoreRebanho.Domain;
+
 namespace ScoreRebanho.Application;
-public record EntradaScoreDto
+
+public interface IProvedorPremissas
 {
- public decimal Area { get; init; }
- public int Posse { get; init; }
- public decimal? ArrendamentoMensal { get; init; }
- public int Pastagem { get; init; }
- public bool PastoPronto { get; init; }
- public bool Rotacao { get; init; }
- public int? Piquetes { get; init; }
- public int Animais { get; init; }
- public decimal PesoCompra { get; init; }
- public decimal PrecoCompra { get; init; }
- public int Dias { get; init; }
- public bool RacaPura { get; init; }
- public bool Carbunculo { get; init; }
- public bool Carrapato { get; init; }
- public bool Vermifugo { get; init; }
- public bool Modificador { get; init; }
-}
-public record ItemDto(string Nome, decimal Valor, string Unidade, string Explicacao);
-public record AlertaDto(string Codigo, string Mensagem);
-public record ResultadoScoreDto(int Score, string Classificacao, ItemDto[] Componentes, ItemDto[] Indicadores, ItemDto[] Custos, ItemDto[] Capital, AlertaDto[] Alertas, string VersaoPremissas, IReadOnlyDictionary<string, string> Premissas);
-public interface IProvedorPremissas { Premissas Obter(); }
-public sealed class CalcularScoreRebanho(IProvedorPremissas provedor)
-{
- public Result<ResultadoScoreDto> Executar(EntradaScoreDto d)
- {
-  var e = new Entrada { Area=d.Area, Posse=(Posse)d.Posse, ArrendamentoMensal=d.ArrendamentoMensal, Pastagem=(Pastagem)d.Pastagem, PastoPronto=d.PastoPronto, Rotacao=d.Rotacao, Piquetes=d.Piquetes, Animais=d.Animais, PesoCompra=d.PesoCompra, PrecoCompra=d.PrecoCompra, Dias=d.Dias, RacaPura=d.RacaPura, Carbunculo=d.Carbunculo, Carrapato=d.Carrapato, Vermifugo=d.Vermifugo, Modificador=d.Modificador };
-  var erros = e.Validar().Select(x => new Error(x.Mensagem).WithMetadata("Campo", x.Campo).WithMetadata("Codigo", "ENTRADA_INVALIDA")).ToArray();
-  if (erros.Length > 0) return Result.Fail<ResultadoScoreDto>(erros);
-  try
-  {
-   var r = Calculadora.Calcular(e, provedor.Obter());
-   static ItemDto[] Map(IEnumerable<Item> itens) => itens.Select(i => new ItemDto(i.Nome,i.Valor,i.Unidade,i.Explicacao)).ToArray();
-   var premissas = typeof(Premissas).GetProperties().ToDictionary(p => p.Name, p => Convert.ToString(p.GetValue(r.Premissas), System.Globalization.CultureInfo.GetCultureInfo("pt-BR")) ?? "");
-   return Result.Ok(new ResultadoScoreDto(r.Score, r.Classificacao, Map(r.Componentes), Map(r.Indicadores), Map(r.Custos), Map(r.Capital), r.Alertas.Select(a => new AlertaDto(a.Codigo,a.Mensagem)).ToArray(), r.Premissas.Versao, premissas));
-  }
-  catch (DivideByZeroException) { return Result.Fail<ResultadoScoreDto>(new Error("Não foi possível calcular com estes valores: capacidade inferior à precisão numérica suportada.").WithMetadata("Codigo", "CALCULO_INDISPONIVEL")); }
-  catch (OverflowException) { return Result.Fail<ResultadoScoreDto>(new Error("Valores excedem a capacidade de cálculo. Reduza os valores informados.").WithMetadata("Codigo", "LIMITE_NUMERICO")); }
- }
+    Premissas Obter();
 }
 
+public sealed class CalcularScoreRebanho(IProvedorPremissas provedor)
+{
+    public Result<ResultadoScoreDto> Executar(EntradaScoreDto dados)
+    {
+        var entrada = CriarEntrada(dados);
+        var erros = entrada.Validar()
+            .Select(erro => new Error(erro.Mensagem)
+                .WithMetadata("Campo", erro.Campo)
+                .WithMetadata("Codigo", "ENTRADA_INVALIDA"))
+            .ToArray();
+
+        if (erros.Length > 0) return Result.Fail<ResultadoScoreDto>(erros);
+
+        try
+        {
+            var resultado = Calculadora.Calcular(entrada, provedor.Obter());
+            return Result.Ok(CriarResposta(resultado));
+        }
+        catch (DivideByZeroException)
+        {
+            return FalhaNumerica("CALCULO_INDISPONIVEL",
+                "Não foi possível calcular com estes valores: capacidade inferior à precisão numérica suportada.");
+        }
+        catch (OverflowException)
+        {
+            return FalhaNumerica("LIMITE_NUMERICO",
+                "Valores excedem a capacidade de cálculo. Reduza os valores informados.");
+        }
+    }
+
+    private static Result<ResultadoScoreDto> FalhaNumerica(string codigo, string mensagem) =>
+        Result.Fail<ResultadoScoreDto>(new Error(mensagem).WithMetadata("Codigo", codigo));
+
+    private static Entrada CriarEntrada(EntradaScoreDto dados) => new()
+    {
+        Area = dados.Area,
+        Posse = (Posse)dados.Posse,
+        ArrendamentoMensal = dados.ArrendamentoMensal,
+        Pastagem = (Pastagem)dados.Pastagem,
+        PastoPronto = dados.PastoPronto,
+        Rotacao = dados.Rotacao,
+        Piquetes = dados.Piquetes,
+        Animais = dados.Animais,
+        PesoCompra = dados.PesoCompra,
+        PrecoCompra = dados.PrecoCompra,
+        Dias = dados.Dias,
+        RacaPura = dados.RacaPura,
+        Carbunculo = dados.Carbunculo,
+        Carrapato = dados.Carrapato,
+        Vermifugo = dados.Vermifugo,
+        Modificador = dados.Modificador
+    };
+
+    private static ResultadoScoreDto CriarResposta(Resultado resultado)
+    {
+        var cultura = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+        var premissas = typeof(Premissas).GetProperties().ToDictionary(
+            propriedade => propriedade.Name,
+            propriedade => Convert.ToString(propriedade.GetValue(resultado.Premissas), cultura) ?? "");
+
+        return new ResultadoScoreDto(
+            resultado.Score,
+            resultado.Classificacao,
+            MapearItens(resultado.Componentes),
+            MapearItens(resultado.Indicadores),
+            MapearItens(resultado.Custos),
+            MapearItens(resultado.Capital),
+            resultado.Alertas.Select(alerta => new AlertaDto(alerta.Codigo, alerta.Mensagem)).ToArray(),
+            resultado.Premissas.Versao,
+            premissas);
+    }
+
+    private static ItemDto[] MapearItens(IEnumerable<Item> itens) =>
+        itens.Select(item => new ItemDto(item.Nome, item.Valor, item.Unidade, item.Explicacao)).ToArray();
+}

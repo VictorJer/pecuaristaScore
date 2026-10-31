@@ -1,9 +1,23 @@
 ﻿@model ContaVm
-<h1>Entrar</h1>
-<p>Senha com ao menos 6 caracteres, maiúscula, minúscula, número e símbolo.</p>
-<form method="post" asp-action="Entrar" class="card card-body col-md-6">
-<div asp-validation-summary="All" class="text-danger" role="alert"></div>
-<label asp-for="Email"></label><input asp-for="Email" class="form-control mb-3" autocomplete="username" />
-<label asp-for="Senha"></label><input asp-for="Senha" class="form-control mb-3" />
-<button type="submit" class="btn btn-success">Entrar</button></form>
-<a asp-action="Entrar">Entrar</a> · <a asp-action="Cadastrar">Criar conta</a>
+@{ ViewData["Title"] = "Entrar"; }
+<div class="row g-4 auth-shell align-items-stretch">
+    <section class="col-lg-6">
+        <div class="hero-panel h-100 d-flex flex-column justify-content-between">
+            <div><p class="eyebrow">Da pastagem ao resultado</p><h1 class="mb-4">Conheça o potencial<br />do seu rebanho.</h1><p class="lead">Transforme os dados da sua propriedade em um planejamento mais claro.</p></div>
+            <div class="border-top border-light border-opacity-25 pt-4 mt-5"><span class="badge rounded-pill bg-light text-success mb-3">Gado de corte · Regime extensivo</span><p class="small mb-0">Capacidade do pasto, custos e risco explicados em uma única simulação.</p></div>
+        </div>
+    </section>
+    <section class="col-lg-6">
+        <div class="card auth-form h-100 justify-content-center">
+            <p class="eyebrow">Sua conta</p><h2 class="mb-2">Bem-vindo de volta.</h2><p class="text-muted mb-4">Informe seu e-mail e senha para continuar.</p>
+            <form method="post" asp-action="Entrar">
+                <div asp-validation-summary="All" class="text-danger mb-3" role="alert"></div>
+                <div class="mb-3"><label asp-for="Email" class="form-label">E-mail</label><input asp-for="Email" class="form-control" autocomplete="username" placeholder="voce@exemplo.com" /><span asp-validation-for="Email" class="text-danger small"></span></div>
+                <div class="mb-3"><label asp-for="Senha" class="form-label"></label><input asp-for="Senha" class="form-control" autocomplete="current-password" aria-describedby="senha-ajuda" /><span asp-validation-for="Senha" class="text-danger small"></span></div>
+                <p id="senha-ajuda" class="small text-muted mb-4">Use ao menos 6 caracteres, com maiúscula, minúscula, número e símbolo.</p>
+                <button type="submit" class="btn btn-success w-100">Entrar na minha conta</button>
+            </form>
+            <div class="mt-4 pt-3 border-top small"><a class="link-success" asp-action="Entrar">Já tenho conta</a><span class="mx-2 text-muted">/</span><a class="link-success" asp-action="Cadastrar">Quero me cadastrar</a></div>
+        </div>
+    </section>
+</div>

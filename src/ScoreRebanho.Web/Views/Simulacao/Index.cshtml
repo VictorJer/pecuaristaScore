@@ -1,30 +1,40 @@
 ﻿@model SimulacaoVm
 @{ ViewData["Title"] = "Novo score"; }
-<h1>Planeje seu rebanho</h1>
+<div class="eyebrow mb-2">Planejamento da propriedade</div>
+<h1>O próximo lote começa com um bom plano.</h1>
 <p class="lead">Informe terreno, lote e manejo para estimar capacidade, custos e risco.</p>
 <p class="text-muted">Resultados estimados. Não garantem lucro ou aprovação de crédito.</p>
+<div class="row g-4 mt-3">
+<div class="col-lg-8">
 <form asp-action="Gerar" method="post">
-<div asp-validation-summary="All" class="text-danger" role="alert"></div>
-<fieldset class="card card-body mb-4"><legend class="h4">Terreno</legend><div class="row g-3">
-<div class="col-md-6"><label asp-for="Area" class="form-label"></label><input asp-for="Area" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="Area" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Posse" class="form-label"></label><select asp-for="Posse" class="form-select"><option value="0">Próprio</option><option value="1">Arrendado</option></select><span asp-validation-for="Posse" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="ArrendamentoMensal" class="form-label"></label><input asp-for="ArrendamentoMensal" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="ArrendamentoMensal" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Pastagem" class="form-label"></label><select asp-for="Pastagem" class="form-select"><option value="0">Verão</option><option value="1">Inverno</option></select><span asp-validation-for="Pastagem" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="PastoPronto" class="form-label"></label><div><input asp-for="PastoPronto" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="PastoPronto" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Rotacao" class="form-label"></label><div><input asp-for="Rotacao" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Rotacao" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Piquetes" class="form-label"></label><input asp-for="Piquetes" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="Piquetes" class="text-danger"></span></div>
-</div></fieldset>
-<fieldset class="card card-body mb-4"><legend class="h4">Lote</legend><div class="row g-3">
-<div class="col-md-6"><label asp-for="Animais" class="form-label"></label><input asp-for="Animais" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="Animais" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="PesoCompra" class="form-label"></label><input asp-for="PesoCompra" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="PesoCompra" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="PrecoCompra" class="form-label"></label><input asp-for="PrecoCompra" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="PrecoCompra" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Dias" class="form-label"></label><input asp-for="Dias" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="Dias" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="RacaPura" class="form-label"></label><div><input asp-for="RacaPura" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="RacaPura" class="text-danger"></span></div>
-</div></fieldset>
-<fieldset class="card card-body mb-4"><legend class="h4">Saúde e manejo</legend><div class="row g-3">
-<div class="col-md-6"><label asp-for="Carbunculo" class="form-label"></label><div><input asp-for="Carbunculo" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Carbunculo" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Carrapato" class="form-label"></label><div><input asp-for="Carrapato" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Carrapato" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Vermifugo" class="form-label"></label><div><input asp-for="Vermifugo" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Vermifugo" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Modificador" class="form-label"></label><div><input asp-for="Modificador" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Modificador" class="text-danger"></span></div>
-</div></fieldset>
-<p>Arrendamento: obrigatório se arrendado. Piquetes: obrigatório com rotação; benefícios a partir de 3.</p><button class="btn btn-success btn-lg" type="submit">Gerar score</button></form>
+<div asp-validation-summary="All" class="text-danger" role="alert">
+</div>
+<partial name="_Terreno" model="Model" />
+<partial name="_Lote" model="Model" />
+<partial name="_Manejo" model="Model" />
+<p>Arrendamento: obrigatório se arrendado. Piquetes: obrigatório com rotação; benefícios a partir de 3.</p>
+<button class="btn btn-success btn-lg w-100" type="submit">Gerar score</button>
+</form>
+</div>
+<aside class="col-lg-4">
+<div class="card card-body p-4">
+<span class="eyebrow mb-3">Antes de começar</span>
+<h2>Os dados de hoje.<br />Uma visão do amanhã.</h2>
+<p class="text-muted mt-3">Tenha em mãos a área disponível, o peso médio do lote e o preço de compra por quilo.</p>
+<hr />
+<h3 class="h6">O que você vai receber</h3>
+<ul class="text-muted ps-3 mb-4">
+<li class="mb-2">Capacidade estimada do pasto</li>
+<li class="mb-2">Custos e capital inicial</li>
+<li class="mb-2">Projeção de receita e margem</li>
+<li>Score com fatores explicados</li>
+</ul>
+<p class="small mb-0">A simulação não é salva. Você poderá editar os dados na tela de resultado.</p>
+</div>
+</aside>
+</div>
+
+
+@section Scripts {
+    <script src="~/js/simulacao.js" asp-append-version="true" defer></script>
+}

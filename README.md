@@ -22,8 +22,12 @@ Valores iniciais ficam em `Premissas` no Domain; podem ser sobrescritos pela se�
 
 AutoMapper 16.2.0: configure `AutoMapper__LicenseKey` conforme a licença aplicável ao projeto; não inclua chaves no repositório.
 
-## Verificação neste ambiente
+## Verificação
 
-Domain e Application compilados. Testes dessas duas camadas executados. A restauração completa depende do pacote `Microsoft.EntityFrameworkCore.Sqlite` 10.0.13, ausente do cache local; a rede deste ambiente bloqueou api.nuget.org. Por isso o build Web/Infrastructure, execução da migration, testes integrados e inspeção visual ainda precisam ser concluídos em ambiente com esse pacote disponível.
+Build completo sem avisos e 15 testes MSTest aprovados (Domain, Application, mapeamentos AutoMapper e migration SQLite). A aplicação está disponível em http://localhost:5020 com o perfil `http`.
 
-Se o ambiente restringir a configuração NuGet do perfil do usuário, use temporariamente `$env:APPDATA` apontando para uma pasta local gravável, mantendo `--configfile NuGet.Config`. Isso não é necessário em uma máquina normalmente configurada.
+O visual usa Bootstrap local com tema em `wwwroot/css/site.css`. O formulário tem parciais por seção, e o cálculo separa composição de custos e alertas. As fórmulas e convenções de negócio foram preservadas.
+
+A inspeção visual automatizada não foi concluída porque o host de acesso ao navegador estava indisponível. Login, cadastro e CSS foram verificados por HTTP.
+
+Em ambientes com restrição ao Event Log do Windows, execute com `$env:Logging__EventLog__LogLevel__Default='None'` para manter os logs no console. As chaves de Data Protection podem ser temporárias nesse ambiente; reiniciar o servidor exige novo login.

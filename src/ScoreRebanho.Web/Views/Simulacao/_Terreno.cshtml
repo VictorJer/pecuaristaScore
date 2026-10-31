@@ -1,0 +1,68 @@
+﻿@model SimulacaoVm
+<fieldset class="card card-body p-4 mb-4">
+<legend class="h4 mb-4">
+<span class="section-number">01</span>Seu terreno</legend>
+<div class="row g-3">
+<div class="col-md-6">
+<label asp-for="Area" class="form-label">
+</label>
+<input asp-for="Area" type="text" inputmode="decimal" class="form-control" />
+<span asp-validation-for="Area" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="Posse" class="form-label">
+</label>
+<select asp-for="Posse" class="form-select">
+<option value="0">Próprio</option>
+<option value="1">Arrendado</option>
+</select>
+<span asp-validation-for="Posse" class="text-danger">
+</span>
+</div>
+<div class="col-md-6" id="campo-arrendamento" hidden="@(Model.Posse != 1)">
+<label asp-for="ArrendamentoMensal" class="form-label">
+</label>
+<input asp-for="ArrendamentoMensal" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Posse != 1)" required="@(Model.Posse == 1)" />
+<span asp-validation-for="ArrendamentoMensal" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="Pastagem" class="form-label">
+</label>
+<select asp-for="Pastagem" class="form-select">
+<option value="0">Verão</option>
+<option value="1">Inverno</option>
+</select>
+<span asp-validation-for="Pastagem" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="PastoPronto" class="form-label">
+</label>
+<div>
+<input asp-for="PastoPronto" class="form-check-input" /> <span class="small text-muted">Sim, considerado nesta simulação</span>
+</div>
+<span asp-validation-for="PastoPronto" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="Rotacao" class="form-label">
+</label>
+<div>
+<input asp-for="Rotacao" class="form-check-input" /> <span class="small text-muted">Sim, considerado nesta simulação</span>
+</div>
+<span asp-validation-for="Rotacao" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="Piquetes" class="form-label">
+</label>
+<input asp-for="Piquetes" type="text" inputmode="decimal" class="form-control" />
+<span asp-validation-for="Piquetes" class="text-danger">
+</span>
+</div>
+</div>
+</fieldset>
+
+

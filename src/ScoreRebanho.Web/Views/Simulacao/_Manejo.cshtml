@@ -1,0 +1,43 @@
+﻿@model SimulacaoVm
+<fieldset class="card card-body p-4 mb-4">
+<legend class="h4 mb-4">
+<span class="section-number">03</span>Saúde e manejo</legend>
+<div class="row g-3">
+<div class="col-md-6">
+<label asp-for="Carbunculo" class="form-label">
+</label>
+<div>
+<input asp-for="Carbunculo" class="form-check-input" /> <span class="small text-muted">Sim, considerado nesta simulação</span>
+</div>
+<span asp-validation-for="Carbunculo" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="Carrapato" class="form-label">
+</label>
+<div>
+<input asp-for="Carrapato" class="form-check-input" /> <span class="small text-muted">Sim, considerado nesta simulação</span>
+</div>
+<span asp-validation-for="Carrapato" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="Vermifugo" class="form-label">
+</label>
+<div>
+<input asp-for="Vermifugo" class="form-check-input" /> <span class="small text-muted">Sim, considerado nesta simulação</span>
+</div>
+<span asp-validation-for="Vermifugo" class="text-danger">
+</span>
+</div>
+<div class="col-md-6">
+<label asp-for="Modificador" class="form-label">
+</label>
+<div>
+<input asp-for="Modificador" class="form-check-input" /> <span class="small text-muted">Sim, considerado nesta simulação</span>
+</div>
+<span asp-validation-for="Modificador" class="text-danger">
+</span>
+</div>
+</div>
+</fieldset>

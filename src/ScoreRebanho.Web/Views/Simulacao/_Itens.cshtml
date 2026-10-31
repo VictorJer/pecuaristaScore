@@ -1,0 +1,6 @@
+﻿@model ItemVm[]
+<div class="table-responsive"><table class="table table-striped"><thead><tr><th scope="col">Item</th><th scope="col">Valor</th><th scope="col">Como interpretar</th></tr></thead><tbody>
+@foreach(var item in Model) {
+<tr><th scope="row">@item.Nome</th><td class="text-nowrap">@(item.Valor.ToString(item.Unidade == "kg/dia" ? "N3" : "N2")) @item.Unidade</td><td>@item.Explicacao</td></tr>
+}
+</tbody></table></div>

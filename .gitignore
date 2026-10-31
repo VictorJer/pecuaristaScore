@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+.local/
+.packages/
+*.db
+*.db-shm
+*.db-wal
+TestResults/

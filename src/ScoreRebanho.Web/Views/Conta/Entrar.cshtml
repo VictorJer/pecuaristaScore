@@ -1,0 +1,9 @@
+﻿@model ContaVm
+<h1>Entrar</h1>
+<p>Senha com ao menos 6 caracteres, maiúscula, minúscula, número e símbolo.</p>
+<form method="post" asp-action="Entrar" class="card card-body col-md-6">
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+<label asp-for="Email"></label><input asp-for="Email" class="form-control mb-3" autocomplete="username" />
+<label asp-for="Senha"></label><input asp-for="Senha" class="form-control mb-3" />
+<button type="submit" class="btn btn-success">Entrar</button></form>
+<a asp-action="Entrar">Entrar</a> · <a asp-action="Cadastrar">Criar conta</a>

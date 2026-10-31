@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-ScoreRebanho.Web-38083112-a868-4fc2-b02e-89557ef72eed</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.2.0" />
+    <PackageReference Include="FluentResults" Version="4.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ScoreRebanho.Application\ScoreRebanho.Application.csproj" />
+    <ProjectReference Include="..\ScoreRebanho.Infrastructure\ScoreRebanho.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

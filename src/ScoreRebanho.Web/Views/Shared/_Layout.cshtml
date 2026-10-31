@@ -1,0 +1,5 @@
+﻿<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>@ViewData["Title"] — Score do Rebanho</title><link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /></head>
+<body class="bg-light"><a class="visually-hidden-focusable" href="#conteudo">Ir para o conteúdo</a><header class="border-bottom bg-white mb-4"><nav class="container py-3 d-flex flex-wrap gap-3 align-items-center"><a class="navbar-brand fw-bold text-success" asp-controller="Simulacao" asp-action="Index">Score do Rebanho</a>
+@if(User.Identity?.IsAuthenticated == true) { <a asp-controller="Conta" asp-action="Senha">Alterar senha</a><form asp-controller="Conta" asp-action="Sair" method="post"><button class="btn btn-outline-secondary btn-sm">Sair</button></form> }
+else { <a asp-controller="Conta" asp-action="Entrar">Entrar</a> }
+</nav></header><main id="conteudo" class="container pb-5">@RenderBody()</main><footer class="container border-top py-3 text-muted">Score do Rebanho · Planejamento com premissas transparentes</footer>@await RenderSectionAsync("Scripts", required: false)</body></html>

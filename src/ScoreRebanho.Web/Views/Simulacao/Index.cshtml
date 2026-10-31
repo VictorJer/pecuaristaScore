@@ -1,0 +1,30 @@
+﻿@model SimulacaoVm
+@{ ViewData["Title"] = "Novo score"; }
+<h1>Planeje seu rebanho</h1>
+<p class="lead">Informe terreno, lote e manejo para estimar capacidade, custos e risco.</p>
+<p class="text-muted">Resultados estimados. Não garantem lucro ou aprovação de crédito.</p>
+<form asp-action="Gerar" method="post">
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+<fieldset class="card card-body mb-4"><legend class="h4">Terreno</legend><div class="row g-3">
+<div class="col-md-6"><label asp-for="Area" class="form-label"></label><input asp-for="Area" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="Area" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Posse" class="form-label"></label><select asp-for="Posse" class="form-select"><option value="0">Próprio</option><option value="1">Arrendado</option></select><span asp-validation-for="Posse" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="ArrendamentoMensal" class="form-label"></label><input asp-for="ArrendamentoMensal" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="ArrendamentoMensal" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Pastagem" class="form-label"></label><select asp-for="Pastagem" class="form-select"><option value="0">Verão</option><option value="1">Inverno</option></select><span asp-validation-for="Pastagem" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="PastoPronto" class="form-label"></label><div><input asp-for="PastoPronto" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="PastoPronto" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Rotacao" class="form-label"></label><div><input asp-for="Rotacao" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Rotacao" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Piquetes" class="form-label"></label><input asp-for="Piquetes" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="Piquetes" class="text-danger"></span></div>
+</div></fieldset>
+<fieldset class="card card-body mb-4"><legend class="h4">Lote</legend><div class="row g-3">
+<div class="col-md-6"><label asp-for="Animais" class="form-label"></label><input asp-for="Animais" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="Animais" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="PesoCompra" class="form-label"></label><input asp-for="PesoCompra" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="PesoCompra" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="PrecoCompra" class="form-label"></label><input asp-for="PrecoCompra" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="PrecoCompra" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Dias" class="form-label"></label><input asp-for="Dias" type="text" inputmode="decimal" class="form-control" /><span asp-validation-for="Dias" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="RacaPura" class="form-label"></label><div><input asp-for="RacaPura" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="RacaPura" class="text-danger"></span></div>
+</div></fieldset>
+<fieldset class="card card-body mb-4"><legend class="h4">Saúde e manejo</legend><div class="row g-3">
+<div class="col-md-6"><label asp-for="Carbunculo" class="form-label"></label><div><input asp-for="Carbunculo" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Carbunculo" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Carrapato" class="form-label"></label><div><input asp-for="Carrapato" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Carrapato" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Vermifugo" class="form-label"></label><div><input asp-for="Vermifugo" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Vermifugo" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Modificador" class="form-label"></label><div><input asp-for="Modificador" class="form-check-input" /> <span>Sim (desmarcado: não)</span></div><span asp-validation-for="Modificador" class="text-danger"></span></div>
+</div></fieldset>
+<p>Arrendamento: obrigatório se arrendado. Piquetes: obrigatório com rotação; benefícios a partir de 3.</p><button class="btn btn-success btn-lg" type="submit">Gerar score</button></form>

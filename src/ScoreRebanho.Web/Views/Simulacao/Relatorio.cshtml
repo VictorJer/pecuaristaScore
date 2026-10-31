@@ -1,0 +1,36 @@
+﻿@model ResultadoVm
+@{ ViewData["Title"]="Relatório"; }
+<h1>Score do Rebanho</h1>
+<div class="card border-success mb-4"><div class="card-body"><p class="display-3">@Model.Score <small class="fs-4">/ 100</small></p><h2>@Model.Classificacao</h2><p>Estimativa baseada em lotação, sanidade, margem e manejo.</p></div></div>
+<div class="alert alert-warning">Estimativas para planejamento. Não garantem lucro, segurança ou aprovação de crédito. Confirme os valores de referência na sua região.</div>
+<h2>Alertas e recomendações</h2>
+@if(Model.Alertas.Length == 0) { <p>Nenhum alerta disparado pelas regras atuais. Isso não elimina os riscos da operação.</p> }
+@foreach(var alerta in Model.Alertas) { <p class="alert alert-warning">@alerta.Mensagem</p> }
+<h2>Composição do score</h2><partial name="_Itens" model="Model.Componentes" />
+<p>O total é arredondado para inteiro antes da classificação. Componentes exibidos com duas casas podem apresentar pequena diferença visual.</p>
+<h2>Produção e resultado financeiro</h2><partial name="_Itens" model="Model.Indicadores" />
+<h2>Custos econômicos do período</h2><partial name="_Itens" model="Model.Custos" />
+<h2>Composição do capital inicial</h2><partial name="_Itens" model="Model.Capital" />
+<p>Capital inclui investimentos integrais e produtos de manejo. Manutenção, arrendamento e suplementação ocorrem durante a operação e estão fora deste indicador. Capital e custo econômico são indicadores distintos; não devem ser somados.</p>
+<details class="card card-body mb-4"><summary>Premissas — versão @Model.VersaoPremissas</summary>
+<p>Arroba viva = 30 kg; UA = 450 kg. Mortalidade reduz somente vendas, sem reduzir despesas. Aplicações no dia zero e em cada intervalo de 90/150 dias, incluindo o último dia. Embalagens arredondadas para cima sobre consumo total. Capacidade em animais usa o peso de compra e arredonda para baixo. Score arredondado com empate para cima. Moeda e demais números: duas casas; GMD: três.</p>
+<p>Formação verão: semente 420 + calcário 375 + adubo 640 + ureia 350 + plantio 600 = R$ 2.385/ha. Inverno: 425 + 250 + 800 + 525 + 400 = R$ 2.400/ha (referências iniciais).</p>
+<dl class="row">@foreach(var p in Model.Premissas) { <dt class="col-sm-6">@p.Key</dt><dd class="col-sm-6">@p.Value</dd> }</dl></details>
+<form asp-action="Editar" method="post">
+<input type="hidden" name="Area" value="@Model.Entrada.Area" />
+<input type="hidden" name="Posse" value="@Model.Entrada.Posse" />
+<input type="hidden" name="ArrendamentoMensal" value="@Model.Entrada.ArrendamentoMensal" />
+<input type="hidden" name="Pastagem" value="@Model.Entrada.Pastagem" />
+<input type="hidden" name="PastoPronto" value="@Model.Entrada.PastoPronto" />
+<input type="hidden" name="Rotacao" value="@Model.Entrada.Rotacao" />
+<input type="hidden" name="Piquetes" value="@Model.Entrada.Piquetes" />
+<input type="hidden" name="Animais" value="@Model.Entrada.Animais" />
+<input type="hidden" name="PesoCompra" value="@Model.Entrada.PesoCompra" />
+<input type="hidden" name="PrecoCompra" value="@Model.Entrada.PrecoCompra" />
+<input type="hidden" name="Dias" value="@Model.Entrada.Dias" />
+<input type="hidden" name="RacaPura" value="@Model.Entrada.RacaPura" />
+<input type="hidden" name="Carbunculo" value="@Model.Entrada.Carbunculo" />
+<input type="hidden" name="Carrapato" value="@Model.Entrada.Carrapato" />
+<input type="hidden" name="Vermifugo" value="@Model.Entrada.Vermifugo" />
+<input type="hidden" name="Modificador" value="@Model.Entrada.Modificador" />
+<button class="btn btn-outline-success" type="submit">Editar dados</button> <a asp-action="Index" class="btn btn-success">Novo score</a></form>

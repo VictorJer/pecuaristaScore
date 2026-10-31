@@ -1,0 +1,7 @@
+﻿@model SenhaVm
+<h1>Alterar senha</h1>
+@if(TempData["Mensagem"] is string mensagem) { <p class="alert alert-success">@mensagem</p> }
+<form method="post" asp-action="Senha" class="card card-body col-md-6"><div asp-validation-summary="All" class="text-danger"></div>
+<label asp-for="Atual"></label><input asp-for="Atual" class="form-control mb-3" autocomplete="current-password" />
+<label asp-for="Nova"></label><input asp-for="Nova" class="form-control mb-3" autocomplete="new-password" />
+<button class="btn btn-success">Alterar senha</button></form>

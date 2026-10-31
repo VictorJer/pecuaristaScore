@@ -1,0 +1,267 @@
+﻿# SPEC.md — Score do Rebanho
+
+## 1. Objetivo
+
+Desenvolver uma aplicação web em C# para apoiar pecuaristas de gado de corte em regime extensivo na região serrana. Antes de comprar o lote ou solicitar crédito, o usuário informa dados do terreno, do rebanho e do manejo. O sistema estima capacidade de pastagem, custos, resultado financeiro e um score de risco de 0 a 100, explicando os fatores que influenciaram o resultado.
+
+O score é uma estimativa para apoiar o planejamento. Não garante lucro, segurança da operação ou aprovação de crédito.
+
+## 2. Público e princípios de produto
+
+- Usuário principal: pecuarista, que precisa de um fluxo curto, linguagem simples e controles fáceis de usar.
+- Usuário secundário: analista de crédito agro, que precisa entender as premissas e os números apresentados.
+- Interface responsiva, adequada a celular e computador, com textos diretos, campos agrupados e mensagens de validação claras.
+- Não apresentar resultado até que os dados obrigatórios sejam válidos e o usuário acione **Gerar score**.
+- Explicar cada alerta e cada componente da pontuação; não exibir somente um número.
+- Marcar resultados como estimativas e exibir as premissas usadas.
+
+## 3. Escopo do MVP
+
+### Incluído
+
+1. Formulário guiado dividido em terreno, lote e saúde/manejo.
+2. Validação de entradas e cálculo de resultados no servidor.
+3. Relatório com score, classificação, fatores de risco, recomendações, previsão de peso, custos, receita, lucro/margem, ponto de equilíbrio, capital inicial estimado, capacidade do pasto e itens de saúde.
+4. Ações **Editar dados** (preservando o preenchimento) e **Novo score** (limpando os dados).
+5. Valores de referência centralizados e configuráveis, sem estarem espalhados pela interface ou pelos controllers.
+6. Testes automatizados para regras e cálculos de domínio, adicionados junto à implementação.
+7. Autenticação e gestão de contas com ASP.NET Core Identity, persistidas com Entity Framework Core.
+
+### Fora do MVP inicial
+
+- Cadastro de produtores como entidade de negócio e persistência/histórico de simulações.
+- Integração automática com cotações ou fontes externas.
+- Envio do resultado ao banco ou decisão de crédito.
+- Juros e fluxo detalhado do financiamento, salvo como evolução posterior.
+- Simulação probabilística de clima, preço ou mortalidade.
+- Aplicativo móvel nativo.
+
+A arquitetura deve permitir adicionar persistência e atualização administrativa de premissas depois, sem mover regras de negócio para a camada web.
+
+Autenticação de usuários é feita com ASP.NET Core Identity. O uso de Identity não implica, por si só, papéis ou permissões de crédito; regras de autorização específicas devem ser definidas quando as funcionalidades correspondentes entrarem no escopo.
+
+## 4. Arquitetura e projetos
+
+Usar ASP.NET Core MVC com Razor Views e uma solução .NET organizada em quatro projetos:
+
+```text
+ScoreRebanho.sln
+src/
+  ScoreRebanho.Domain/
+  ScoreRebanho.Application/
+  ScoreRebanho.Infrastructure/
+  ScoreRebanho.Web/
+tests/
+  ScoreRebanho.Domain.Tests/
+  ScoreRebanho.Application.Tests/
+```
+
+Dependências permitidas:
+
+```text
+Domain          → nenhuma camada da aplicação
+Application     → Domain
+Infrastructure  → Application + Domain
+Web             → Application
+Web (composition root) configura implementações de Infrastructure
+```
+
+- **Domain**: entidades/objetos de valor, regras puras, cálculos e políticas de score. Sem dependência de ASP.NET Core, Entity Framework ou banco.
+- **Application**: casos de uso, contratos de entrada/saída, orquestração e interfaces de serviços/repositórios quando necessárias. Caso de uso principal: `CalcularScoreRebanho`.
+- **Infrastructure**: implementações técnicas, acesso a dados e carregamento de configurações. A persistência necessária ao ASP.NET Core Identity fica nesta camada com EF Core; não adicionar histórico de simulações ou outras tabelas de negócio até entrarem no escopo.
+- **Web / Apresentação**: controllers MVC, ViewModels, Razor Views, validação de formulário, tratamento de erros e composição de dependências. Controllers não calculam score nem custos.
+
+Preferir nomes e mensagens em português na interface. Código pode seguir convenção C# em português ou inglês, mas manter uma única convenção consistente.
+
+## 5. Fluxo principal
+
+1. Usuário abre a tela de nova simulação.
+2. Preenche terreno, lote e manejo/saúde.
+3. A aplicação valida os dados; entradas inválidas retornam à tela com os valores já preenchidos e erros próximos aos campos.
+4. Ao submeter **Gerar score**, a camada Web mapeia o ViewModel para um comando da Aplicação.
+5. A Aplicação chama o domínio para calcular os indicadores e score usando as premissas vigentes.
+6. A tela de relatório apresenta o resultado e as premissas.
+7. **Editar dados** volta ao formulário preenchido. **Novo score** inicia simulação limpa.
+
+Não confiar em valores calculados enviados pelo navegador. Recalcular no servidor a cada submissão.
+
+## 6. Dados de entrada
+
+### Terreno
+
+- Área em hectares (obrigatório, maior que zero).
+- Tipo de posse: próprio ou arrendado.
+- Valor do arrendamento mensal (obrigatório se arrendado; não negativo).
+- Tipo de pastagem: verão ou inverno.
+- Pasto pronto: sim/não.
+- Rotação de pastagem: sim/não.
+- Número de piquetes, obrigatório quando rotação estiver ativa; rotação só produz efeito com pelo menos 3 piquetes.
+
+### Lote
+
+- Quantidade de animais (inteiro positivo).
+- Peso médio de compra em kg (positivo).
+- Preço pago por kg vivo em reais (positivo ou zero, conforme regra de validação definida pelo produto; padrão recomendado: maior que zero).
+- Dias na pastagem (inteiro positivo).
+- Raça pura para corte: sim/não.
+
+### Saúde e manejo
+
+- Vacina de carbúnculo: sim/não.
+- Controle de carrapato: sim/não.
+- Vermífugo: sim/não.
+- Modificador orgânico: sim/não.
+
+Usar tipos apropriados (`decimal` para valores e pesos; `int` para quantidades/dias; enums para escolhas). Arredondar apenas para exibição, preservando precisão interna nos cálculos.
+
+## 7. Premissas e regras iniciais do cálculo
+
+As regras abaixo são a configuração inicial descrita no documento do MVP. Implementá-las de forma isolada e identificável, para facilitar validação e atualização. Valores não devem ficar embutidos em controllers ou views.
+
+### Conversões e lotação
+
+- 1 arroba de animal vivo = 30 kg (convenção adotada pelo grupo).
+- 1 UA = 450 kg de peso vivo.
+- UA do lote = animais × peso médio de compra ÷ 450.
+- Capacidade base: verão = 1,0 UA/ha; inverno = 1,2 UA/ha.
+- Com rotação e pelo menos 3 piquetes: multiplicador = `min(1,6; 1 + 0,15 × (piquetes - 1))`; caso contrário = 1,0.
+- Capacidade total em UA = área × capacidade base × multiplicador de rotação.
+- Ocupação percentual = UA do lote ÷ capacidade total em UA × 100.
+- Até 100%: sem penalidade de superlotação.
+- Acima de 100%: fator de GMD = `max(0,45; 1 - 0,5 × (ocupação decimal - 1))`.
+- Acima de 100%: somar 4 pontos percentuais de mortalidade por cada 100 pontos percentuais acima da capacidade (implementar a regra explicitamente e aplicar o teto de mortalidade).
+- Acima de 110%: custo adicional de suplementação de R$ 3,00 por animal por dia para cada 100 pontos percentuais de ocupação acima de 110%, conforme interpretação adotada no código do MVP; tornar fórmula visível e fácil de alterar.
+- Abaixo de 50%: reduzir parcialmente a pontuação de lotação; ver regra de score.
+
+### Ganho de peso e mortalidade
+
+- GMD base extensivo = 0,55 kg/dia.
+- Ajustes de GMD: raça pura +0,10; controle de carrapato +0,04; vermífugo +0,05; modificador orgânico +0,12 kg/dia.
+- Aplicar o fator de superlotação ao GMD calculado.
+- Peso de venda por animal = peso de compra + GMD ajustado × dias.
+- Mortalidade base = 1,5%.
+- Sem carbúnculo: +1,5 ponto percentual; sem controle de carrapato: +1,2 pp; sem vermífugo: +0,8 pp.
+- Aplicar acréscimo de superlotação conforme a regra acima; limitar mortalidade total a 15%.
+- Animais vendidos estimados = animais iniciais × (1 − mortalidade).
+- Peso total vendido em kg = animais vendidos estimados × peso de venda por animal.
+- Arrobas vendidas = peso total vendido em kg ÷ 30.
+
+### Custos
+
+- Compra do gado = animais × peso médio de compra × preço pago por kg vivo.
+- Manutenção de pasto por ano: verão R$ 300/ha; inverno R$ 450/ha. Proporcionalizar pelos dias de uso (dias/365).
+- Formação do pasto, quando não estiver pronto: custos por hectare da tabela abaixo. Verão contabiliza 1/5 do custo total; inverno contabiliza o custo total.
+- Formação verão (R$/ha): semente 420; calcário 375; adubo base 640; ureia 350; preparo/plantio 600; total 2.385.
+- Formação inverno (R$/ha): semente 425; calcário 250; adubo base 800; ureia 525; preparo/plantio 400; total 2.400.
+- Rotação: investimento = área × (R$ 150 + R$ 60 × número de piquetes), amortizado em 10 anos. Definir e documentar a proporcionalização ao período analisado (dias/3650) para custo econômico; exibir separadamente investimento total e parcela atribuída ao período. Para capital inicial, usar o investimento total se essa for a convenção de crédito escolhida.
+- Arrendamento = valor mensal × dias ÷ 30.
+- Medicamentos: calcular volume necessário por animal e número de frascos inteiros, arredondando frascos para cima.
+  - Carbúnculo: dose 2 ml/animal, 1 aplicação; frasco 100 ml a R$ 40.
+  - Carrapato: dose 4 ml/animal, 1 aplicação a cada 90 dias; frasco 500 ml a R$ 100. Aplicações no período: incluir aplicação inicial e as que vencerem até o fim do período; regra deve ser explicitada e validada.
+  - Vermífugo: dose 6 ml/animal, 1 aplicação a cada 150 dias; frasco 500 ml a R$ 85. Aplicações no período: explicitar a convenção de aplicação inicial e intervalos.
+  - Modificador orgânico: 0,05 kg/animal/dia; saco de 25 kg a R$ 120; sacos arredondados para cima.
+- Gasto total deve somar os itens de custo considerados na operação. Mostrar composição discriminada.
+- Capital inicial estimado: compra do gado + formação do pasto conforme regra de capital + rotação conforme regra de capital + medicamentos. Apresentar os componentes e indicar claramente que manutenção, arrendamento e suplementação podem ocorrer durante a operação e se estão fora desse indicador.
+
+### Resultado financeiro
+
+- Preço de referência inicial de venda = R$ 340/@.
+- Preço por kg vivo equivalente = preço/@ ÷ 30.
+- Receita = arrobas vendidas × preço de referência.
+- Lucro estimado = receita − gasto total.
+- Margem = lucro ÷ gasto total; tratar gasto total zero sem divisão por zero.
+- Preço de equilíbrio por kg vivo = gasto total ÷ kg vendidos; se não houver kg vendidos, retornar resultado indisponível com explicação.
+- Apresentar cenário de queda de 10% no preço da arroba.
+
+### Score (0–100)
+
+Somar quatro componentes e limitar resultado final ao intervalo de 0 a 100:
+
+1. **Lotação (30 pontos)**: 30 pontos entre 50% e 100% de ocupação; acima de 100%, decrescer linearmente até 0 em 180%; abaixo de 50%, perder até 12 pontos proporcionalmente ao afastamento de 50% (0% de ocupação equivale a 18 pontos).
+2. **Sanidade (25 pontos)**: carbúnculo 8; carrapato 7; vermífugo 7; modificador orgânico 3. Conceder pontos quando o respectivo item estiver marcado como realizado/ativo.
+3. **Resultado financeiro (30 pontos)**: margem de 20% ou mais = 30; margem de −10% ou menos = 0; interpolação linear entre os limites.
+4. **Manejo e custos fixos (15 pontos)**: raça pura 6; prazo entre 120 e 365 dias inclusive 3 (fora desse intervalo 1); terreno próprio 2; rotação ativa com pelo menos 3 piquetes 4.
+
+Classificação:
+
+- 80–100: **Risco baixo**.
+- 60–79: **Risco moderado**.
+- 40–59: **Risco alto**.
+- 0–39: **Risco muito alto**.
+
+Gerar motivos e recomendações a partir das regras que dispararam os alertas (ex.: ocupação excede capacidade, ausência de manejo sanitário ou margem baixa). Não usar mensagens que prometam aprovação de crédito.
+
+## 8. Relatório
+
+Apresentar, no mínimo:
+
+- Score total, faixa de risco e explicação resumida.
+- Pontos por componente e fatores que contribuíram para cada pontuação.
+- Alertas prioritários e recomendações acionáveis.
+- Ocupação atual, capacidade em UA e estimativa de animais compatível com a área, com e sem rotação quando aplicável.
+- GMD usado, mortalidade estimada, peso de venda por animal e total vendido.
+- Custos discriminados, capital inicial estimado e premissas de capital.
+- Receita, lucro, margem, preço de equilíbrio e cenário de preço −10%.
+- Aviso de que são estimativas e os valores de referência devem ser confirmados na região.
+
+Usar formatação monetária brasileira (R$), separador decimal local e unidades em todos os valores.
+
+## 9. Requisitos de qualidade
+
+- Validação no servidor para todas as entradas; validação no cliente pode complementar, nunca substituir.
+- Proteção contra valores negativos, divisão por zero, estouro e resultados não finitos.
+- Cálculo determinístico: mesmas entradas e mesmas premissas produzem o mesmo resultado.
+- Arredondamento consistente apenas na apresentação; explicar critérios de arredondamento de frascos, sacos e moeda.
+- Interface acessível por teclado, labels associados aos campos e contraste legível.
+- Não incluir dados pessoais sensíveis sem necessidade. No escopo inicial, contas Identity são obrigatórias para simular; não há salvamento de simulações.
+- Registrar as premissas e a versão do conjunto de parâmetros usado em cada cálculo, ao menos na resposta do caso de uso, para permitir rastreabilidade futura.
+
+## 10. Critérios de aceite
+
+- O usuário consegue preencher e submeter uma simulação válida do início ao relatório.
+- Entradas inválidas não geram resultado e são apresentadas junto ao campo correspondente, preservando o preenchimento.
+- É possível editar e recalcular sem redigitar e iniciar uma simulação limpa.
+- Todos os cálculos ocorrem no servidor e os totais do relatório são coerentes com a composição exibida.
+- Componentes do score totalizam no máximo 100 e a classificação respeita os limites definidos.
+- Casos de ocupação abaixo de 50%, dentro de 50–100%, acima de 100% e acima de 180% têm comportamento definido e coberto por testes.
+- Casos de mortalidade limitada a 15%, período sem aplicações repetidas e arredondamento de embalagens têm comportamento definido e coberto por testes.
+- Layout é utilizável em tela estreita e não exige conhecimento técnico do usuário.
+
+## 11. Pendências de produto a resolver durante a implementação
+
+As regras originais têm alguns pontos que precisam de decisão explícita para evitar resultados contraditórios. Antes de fechar a primeira versão, documentar as convenções adotadas e mantê-las configuráveis quando razoável:
+
+1. Se o preço de venda de R$ 340/@ é por arroba de animal vivo, garantir coerência com a conversão de 30 kg vivos por arroba em todos os cálculos e exemplos.
+2. Definir se a mortalidade é calculada apenas para estimar animais vendidos ou se também reduz a compra/custos de medicamentos e suplementos.
+3. Definir o significado operacional de “aplicações a cada 90/150 dias”, inclusive se há dose no dia inicial e quantas aplicações entram no período.
+4. Definir como a suplementação acima de 110% cresce conforme o excedente de ocupação.
+5. Distinguir custo de formação alocado ao período, investimento total e necessidade de capital inicial; não somar valores diferentes sem identificá-los.
+6. Definir a fórmula exata para estimar a quantidade máxima de animais, inclusive peso de referência usado na conversão para UA.
+7. Definir casas decimais e arredondamentos do score e do limite entre as faixas (o score final exibido deve ser inteiro; usar faixas 80+, 60–79, 40–59, 0–39).
+
+Não ocultar divergências: refletir as decisões escolhidas em testes, no relatório e na versão das premissas.
+
+## 12. Diretrizes de implementação
+
+- Começar pela solução e projetos, depois implementar os tipos de domínio e cálculos puros, em seguida o caso de uso, e por fim o fluxo MVC e o relatório.
+- Manter entrada/saída da Aplicação separada dos ViewModels da Web.
+- Evitar controllers gordos, lógica de negócio em Razor/JavaScript e abstrações sem uso real.
+- Não adicionar persistência de simulações, integrações externas ou abstrações sem necessidade para o escopo aprovado. A autenticação usa ASP.NET Core Identity, com stores EF Core na Infrastructure.
+- Adicionar testes automatizados conforme cada regra é implementada, usando os casos numéricos do documento como referência após resolver as pendências acima.
+
+
+## 13. Convenções aprovadas — versão 1.0
+
+- Login obrigatório; SQLite persiste somente contas Identity. Cadastro, login, logout e alteração de senha; sem envio de e-mail nesta versão.
+- R$ 340 por arroba viva de 30 kg. Preço de compra obrigatoriamente positivo.
+- Mortalidade reduz apenas vendas; despesas usam animais iniciais. Quantidade vendida estimada pode ser fracionária.
+- Aplicações: 1 + piso(dias/intervalo), incluindo dia zero e último dia coincidente. Frascos calculados sobre volume total; embalagens sempre arredondadas para cima.
+- Suplementação = animais × dias × R$ 3 × máximo(0, ocupação decimal − 1,10).
+- Mortalidade adicional = 0,04 × máximo(0, ocupação decimal − 1), com teto total 15%.
+- Formação econômica: verão 1/5, inverno integral; capital considera investimento integral quando pasto não pronto.
+- Rotação marcada gera custo mesmo abaixo de três piquetes; somente três ou mais geram benefícios. Amortização dias/3650; capital integral.
+- Capital inclui compra, formação, rotação e todos os produtos selecionados, inclusive modificador. Exclui manutenção, arrendamento e suplementação.
+- Capacidade em animais = piso(capacidade UA × 450 / peso de compra).
+- Score limitado a 0–100 e arredondado com empate para cima antes da classificação. Exibição com duas casas, exceto GMD com três e score inteiro. Os componentes podem diferir visualmente do inteiro por arredondamento.
+- Parâmetros inválidos impedem inicialização; estouro numérico de entradas retorna falha esperada sem relatório parcial.
+- Cenário adverso altera somente preço/receita e seus resultados financeiros, preservando produção e custos.
